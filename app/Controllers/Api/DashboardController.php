@@ -54,7 +54,7 @@ class DashboardController extends Controller
 
     public function configV2(): JsonResponse
     {
-        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation']));
+        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment']));
     }
 
     public function update(UpdateUserRequest $request): JsonResponse
@@ -101,6 +101,26 @@ class DashboardController extends Controller
 
         if ($valid->get('can_reply') !== null) {
             $user->can_reply = boolval($valid->can_reply);
+        }
+
+        if ($valid->get('show_home') !== null) {
+            $user->show_home = boolval($valid->show_home);
+        }
+
+        if ($valid->get('show_bride') !== null) {
+            $user->show_bride = boolval($valid->show_bride);
+        }
+
+        if ($valid->get('show_wedding_date') !== null) {
+            $user->show_wedding_date = boolval($valid->show_wedding_date);
+        }
+
+        if ($valid->get('show_gallery') !== null) {
+            $user->show_gallery = boolval($valid->show_gallery);
+        }
+
+        if ($valid->get('show_comment') !== null) {
+            $user->show_comment = boolval($valid->show_comment);
         }
 
         if (!empty($valid->get('old_password')) && !empty($valid->get('new_password'))) {

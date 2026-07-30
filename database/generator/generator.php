@@ -27,6 +27,11 @@ return new class implements Generator
             'is_filter' => true,
             'is_active' => true,
             'is_confetti_animation' => true,
+            'show_home' => true,
+            'show_bride' => true,
+            'show_wedding_date' => true,
+            'show_gallery' => true,
+            'show_comment' => true,
             'tz' => 'Asia/Jakarta',
             'access_key' => Hash::rand(25),
         ])->save();
