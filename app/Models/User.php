@@ -36,6 +36,10 @@ final class User extends Model
         'tenor_key',
         'is_confetti_animation',
         'tz',
+        'theme_primary_color',
+        'theme_secondary_color',
+        'theme_background_color',
+        'theme_font',
     ];
 
     protected $casts = [

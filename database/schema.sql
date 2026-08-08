@@ -15,6 +15,15 @@ CREATE TABLE IF NOT EXISTS users (
     is_confetti_animation BOOLEAN DEFAULT TRUE,
     tenor_key VARCHAR(100),
     tz VARCHAR(70) DEFAULT 'Asia/Jakarta',
+    show_home BOOLEAN DEFAULT TRUE,
+    show_bride BOOLEAN DEFAULT TRUE,
+    show_wedding_date BOOLEAN DEFAULT TRUE,
+    show_gallery BOOLEAN DEFAULT TRUE,
+    show_comment BOOLEAN DEFAULT TRUE,
+    theme_primary_color VARCHAR(7) DEFAULT '#0d6efd',
+    theme_secondary_color VARCHAR(7) DEFAULT '#6c757d',
+    theme_background_color VARCHAR(7) DEFAULT '#ffffff',
+    theme_font VARCHAR(30) DEFAULT 'default',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
