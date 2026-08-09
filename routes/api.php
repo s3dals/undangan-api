@@ -2,6 +2,7 @@
 
 use App\Controllers\Api\AuthController;
 use App\Controllers\Api\CommentController;
+use App\Controllers\Api\ContentController;
 use App\Controllers\Api\DashboardController;
 use App\Controllers\Api\GuestController;
 use App\Middleware\AuthMiddleware;
@@ -35,6 +36,11 @@ Route::middleware([RateLimitMiddleware::class, AuthMiddleware::class])->group(fu
         Route::get('/user', [DashboardController::class, 'user']);
         Route::patch('/user', [DashboardController::class, 'update']);
         Route::options('/user');
+
+        // Invitation texts
+        Route::get('/content', [ContentController::class, 'index']);
+        Route::put('/content', [ContentController::class, 'update']);
+        Route::options('/content');
 
         // Guest list
         Route::prefix('/guest')->group(function () {
@@ -84,6 +90,9 @@ Route::middleware([RateLimitMiddleware::class, AuthMiddleware::class])->group(fu
             Route::get('/', [CommentController::class, 'getV2']);
             Route::options('/');
         });
+
+        Route::get('/content', [ContentController::class, 'index']);
+        Route::options('/content');
 
         // Personal invitation lookup + RSVP, resolved by token.
         Route::prefix('/guest/{token}')->group(function () {

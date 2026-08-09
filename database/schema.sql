@@ -48,6 +48,18 @@ CREATE TABLE IF NOT EXISTS guests (
 );
 
 -- =====================================
+-- Contents table (editable invitation texts)
+-- =====================================
+CREATE TABLE IF NOT EXISTS contents (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    content_key VARCHAR(50) NOT NULL,
+    content_value TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- =====================================
 -- Comments table (all columns from migrations)
 -- =====================================
 CREATE TABLE IF NOT EXISTS comments (
