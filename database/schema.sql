@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS users (
     show_wedding_date BOOLEAN DEFAULT TRUE,
     show_gallery BOOLEAN DEFAULT TRUE,
     show_comment BOOLEAN DEFAULT TRUE,
+    show_story BOOLEAN DEFAULT TRUE,
+    show_gift BOOLEAN DEFAULT TRUE,
     theme_primary_color VARCHAR(7) DEFAULT '#0d6efd',
     theme_secondary_color VARCHAR(7) DEFAULT '#6c757d',
     theme_background_color VARCHAR(7) DEFAULT '#ffffff',
