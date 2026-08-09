@@ -23,7 +23,9 @@ CREATE TABLE IF NOT EXISTS users (
     theme_primary_color VARCHAR(7) DEFAULT '#0d6efd',
     theme_secondary_color VARCHAR(7) DEFAULT '#6c757d',
     theme_background_color VARCHAR(7) DEFAULT '#ffffff',
+    theme_text_color VARCHAR(7) DEFAULT '#212529',
     theme_font VARCHAR(30) DEFAULT 'default',
+    is_custom_theme BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
