@@ -42,6 +42,9 @@ final class User extends Model
         'theme_text_color',
         'theme_font',
         'is_custom_theme',
+        'photo_home_url',
+        'photo_bride_url',
+        'photo_groom_url',
     ];
 
     protected $casts = [

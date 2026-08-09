@@ -140,6 +140,9 @@ https://www.postman.com/dewanakl/workspace/undangan/collection/20716209-a29ef362
   - DEBUG [false]
   - LOG [false]
   - APP_KEY [copy from your local env]
+  - SUPABASE_URL (your Supabase project URL, e.g. `https://xxxx.supabase.co`, needed for photo uploads)
+  - SUPABASE_SERVICE_KEY (Supabase service_role secret key, needed for photo uploads)
+  - SUPABASE_BUCKET (Supabase Storage bucket name, e.g. `photos`, must be public)
 - Done.
 </details>
 
