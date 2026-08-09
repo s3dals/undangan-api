@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS guests (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
+    greeting VARCHAR(100),
     token VARCHAR(32) NOT NULL UNIQUE,
     max_guests INTEGER NOT NULL DEFAULT 1,
     status VARCHAR(10) NOT NULL DEFAULT 'pending',

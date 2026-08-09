@@ -11,6 +11,7 @@ final class Guest extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'greeting',
         'token',
         'max_guests',
         'status',
