@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
     theme_text_color VARCHAR(7) DEFAULT '#212529',
     theme_font VARCHAR(30) DEFAULT 'default',
     is_custom_theme BOOLEAN DEFAULT FALSE,
+    rsvp_deadline VARCHAR(10),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

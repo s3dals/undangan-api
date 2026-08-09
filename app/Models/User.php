@@ -42,6 +42,7 @@ final class User extends Model
         'theme_text_color',
         'theme_font',
         'is_custom_theme',
+        'rsvp_deadline',
     ];
 
     protected $casts = [
