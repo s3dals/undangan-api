@@ -31,7 +31,23 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- =====================================
--- Comments table (all columns from migrations) 
+-- Guests table (personal invitations + RSVP)
+-- =====================================
+CREATE TABLE IF NOT EXISTS guests (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    token VARCHAR(32) NOT NULL UNIQUE,
+    max_guests INTEGER NOT NULL DEFAULT 1,
+    status VARCHAR(10) NOT NULL DEFAULT 'pending',
+    guest_count INTEGER NOT NULL DEFAULT 0,
+    responded_at TIMESTAMP,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- =====================================
+-- Comments table (all columns from migrations)
 -- =====================================
 CREATE TABLE IF NOT EXISTS comments (
     id SERIAL PRIMARY KEY,
