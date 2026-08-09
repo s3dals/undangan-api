@@ -157,23 +157,15 @@ class ContentController extends Controller
         }
 
         $insert = [];
-        $remove = [];
         $change = [];
 
         foreach ($items as $key => $value) {
             $value = is_string($value) ? trim($value) : '';
             $current = $existing[$key] ?? null;
 
-            // Empty means "fall back to whatever the template says", so the row is
-            // dropped rather than stored as an empty string.
-            if ($value === '') {
-                if ($current) {
-                    $remove[] = intval($current->id);
-                }
-
-                continue;
-            }
-
+            // An empty value is stored rather than dropped: it means "show
+            // nothing here", which has to be distinguishable from a key that was
+            // never filled in at all, where the template wording still stands.
             if (!$current) {
                 $insert[$key] = $value;
                 continue;
@@ -182,10 +174,6 @@ class ContentController extends Controller
             if (strval($current->content_value) !== $value) {
                 $change[intval($current->id)] = $value;
             }
-        }
-
-        if (count($remove) > 0) {
-            Content::whereIn('id', $remove)->delete();
         }
 
         if (count($change) > 0) {
@@ -201,15 +189,11 @@ class ContentController extends Controller
         // query is worth removing from this request.
         $result = [];
         foreach ($items as $key => $value) {
-            $value = is_string($value) ? trim($value) : '';
-
-            if ($value !== '') {
-                $result[$key] = $value;
-            }
+            $result[$key] = is_string($value) ? trim($value) : '';
         }
 
         foreach ($existing as $key => $row) {
-            if (!array_key_exists($key, $items) && strval($row->content_value) !== '') {
+            if (!array_key_exists($key, $items)) {
                 $result[$key] = $row->content_value;
             }
         }
