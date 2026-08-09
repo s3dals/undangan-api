@@ -3,6 +3,7 @@
 use App\Controllers\Api\AuthController;
 use App\Controllers\Api\CommentController;
 use App\Controllers\Api\DashboardController;
+use App\Controllers\Api\GuestController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\DashboardMiddleware;
 use App\Middleware\RateLimitMiddleware;
@@ -34,6 +35,19 @@ Route::middleware([RateLimitMiddleware::class, AuthMiddleware::class])->group(fu
         Route::get('/user', [DashboardController::class, 'user']);
         Route::patch('/user', [DashboardController::class, 'update']);
         Route::options('/user');
+
+        // Guest list
+        Route::prefix('/guest')->group(function () {
+            Route::get('/', [GuestController::class, 'index']);
+            Route::post('/', [GuestController::class, 'create']);
+            Route::options('/');
+
+            Route::prefix('/{id}')->group(function () {
+                Route::patch('/', [GuestController::class, 'update']);
+                Route::delete('/', [GuestController::class, 'destroy']);
+                Route::options('/');
+            });
+        });
     });
 
     // Comment
@@ -68,6 +82,13 @@ Route::middleware([RateLimitMiddleware::class, AuthMiddleware::class])->group(fu
 
         Route::prefix('/comment')->group(function () {
             Route::get('/', [CommentController::class, 'getV2']);
+            Route::options('/');
+        });
+
+        // Personal invitation lookup + RSVP, resolved by token.
+        Route::prefix('/guest/{token}')->group(function () {
+            Route::get('/', [GuestController::class, 'show']);
+            Route::post('/', [GuestController::class, 'rsvp']);
             Route::options('/');
         });
     });
