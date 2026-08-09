@@ -36,6 +36,12 @@ final class User extends Model
         'tenor_key',
         'is_confetti_animation',
         'tz',
+        'theme_primary_color',
+        'theme_secondary_color',
+        'theme_background_color',
+        'theme_text_color',
+        'theme_font',
+        'is_custom_theme',
     ];
 
     protected $casts = [
@@ -50,6 +56,7 @@ final class User extends Model
         'show_comment' => 'bool',
         'is_active' => 'bool',
         'is_confetti_animation' => 'bool',
+        'is_custom_theme' => 'bool',
     ];
 
     public function __construct(array $data = [])

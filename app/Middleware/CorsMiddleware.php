@@ -12,7 +12,7 @@ final class CorsMiddleware implements MiddlewareInterface
     public function handle(Request $request, Closure $next)
     {
         $header = respond()->getHeader();
-        $header->set('Access-Control-Allow-Origin', '*');
+        $header->set('Access-Control-Allow-Origin', env('CORS_ORIGIN', '*'));
         $header->set('Access-Control-Max-Age', '3600');
         $header->set('Access-Control-Expose-Headers', 'Content-Length, Content-Disposition');
 

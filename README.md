@@ -134,6 +134,7 @@ https://www.postman.com/dewanakl/workspace/undangan/collection/20716209-a29ef362
   - DB_NAME (your name of database cloud dbms)
   - DB_PORT (your port cloud dbms)
   - DB_DRIV (type cloud dbms [ex. mysql or pgsql])
+  - DB_OPTIONS (extra DSN options, e.g. `sslmode=require` for Supabase pooler)
   - JWT_KEY [ex. 123]
   - HTTPS [true]
   - DEBUG [false]

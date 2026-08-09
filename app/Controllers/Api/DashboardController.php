@@ -17,6 +17,8 @@ use DateTimeZone;
 
 class DashboardController extends Controller
 {
+    private const THEME_FONTS = ['default', 'elegant', 'modern', 'classic', 'script'];
+
     private $json;
 
     public function __construct(JsonResponse $json)
@@ -54,7 +56,7 @@ class DashboardController extends Controller
 
     public function configV2(): JsonResponse
     {
-        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment']));
+        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment', 'theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color', 'theme_font', 'is_custom_theme']));
     }
 
     public function update(UpdateUserRequest $request): JsonResponse
@@ -121,6 +123,28 @@ class DashboardController extends Controller
 
         if ($valid->get('show_comment') !== null) {
             $user->show_comment = boolval($valid->show_comment);
+        }
+
+        foreach (['theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color'] as $field) {
+            if (!empty($valid->get($field))) {
+                if (!preg_match('/^#[0-9a-fA-F]{6}$/', $valid->get($field))) {
+                    return $this->json->errorBadRequest([sprintf('%s must be a valid hex color.', $field)]);
+                }
+
+                $user->{$field} = strtolower($valid->get($field));
+            }
+        }
+
+        if (!empty($valid->get('theme_font'))) {
+            if (!in_array($valid->get('theme_font'), self::THEME_FONTS)) {
+                return $this->json->errorBadRequest(['Invalid theme font.']);
+            }
+
+            $user->theme_font = $valid->get('theme_font');
+        }
+
+        if ($valid->get('is_custom_theme') !== null) {
+            $user->is_custom_theme = boolval($valid->get('is_custom_theme'));
         }
 
         if (!empty($valid->get('old_password')) && !empty($valid->get('new_password'))) {
