@@ -80,6 +80,41 @@ class ContentController extends Controller
         $db->execute();
     }
 
+    /**
+     * Updates every changed row in one statement. One UPDATE per field was
+     * still ~28 sequential round trips when filling in a form that already had
+     * rows, which is close enough to the function timeout to matter.
+     *
+     * @param array<int, string> $items id => value
+     * @return void
+     */
+    private function updateMany(array $items): void
+    {
+        $rows = [];
+        $bind = [];
+        $i = 0;
+
+        foreach ($items as $id => $value) {
+            $rows[] = sprintf('(CAST(:i%1$d AS BIGINT), CAST(:v%1$d AS TEXT))', $i);
+            $bind[':i' . $i] = $id;
+            $bind[':v' . $i] = $value;
+            $i++;
+        }
+
+        /** @var DataBase $db */
+        $db = App::get()->singleton(DataBase::class);
+        $db->query(sprintf(
+            'UPDATE contents SET content_value = v.value FROM (VALUES %s) AS v(id, value) WHERE contents.id = v.id',
+            join(', ', $rows)
+        ));
+
+        foreach ($bind as $param => $value) {
+            $db->bind($param, $value);
+        }
+
+        $db->execute();
+    }
+
     public function index(): JsonResponse
     {
         return $this->json->successOK($this->map());
@@ -123,6 +158,7 @@ class ContentController extends Controller
 
         $insert = [];
         $remove = [];
+        $change = [];
 
         foreach ($items as $key => $value) {
             $value = is_string($value) ? trim($value) : '';
@@ -144,12 +180,16 @@ class ContentController extends Controller
             }
 
             if (strval($current->content_value) !== $value) {
-                Content::where('id', intval($current->id))->update(['content_value' => $value]);
+                $change[intval($current->id)] = $value;
             }
         }
 
         if (count($remove) > 0) {
             Content::whereIn('id', $remove)->delete();
+        }
+
+        if (count($change) > 0) {
+            $this->updateMany($change);
         }
 
         if (count($insert) > 0) {
