@@ -56,7 +56,7 @@ class DashboardController extends Controller
 
     public function configV2(): JsonResponse
     {
-        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment', 'theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color', 'theme_font', 'is_custom_theme']));
+        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment', 'theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color', 'theme_font', 'is_custom_theme', 'rsvp_deadline']));
     }
 
     public function update(UpdateUserRequest $request): JsonResponse
@@ -145,6 +145,23 @@ class DashboardController extends Controller
 
         if ($valid->get('is_custom_theme') !== null) {
             $user->is_custom_theme = boolval($valid->get('is_custom_theme'));
+        }
+
+        if (array_key_exists('rsvp_deadline', $request->all())) {
+            $deadline = $valid->get('rsvp_deadline');
+
+            if (empty($deadline)) {
+                // Clearing the deadline leaves the RSVP open indefinitely.
+                $user->rsvp_deadline = null;
+            } else {
+                $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $deadline);
+
+                if (!$date || $date->format('Y-m-d') !== $deadline) {
+                    return $this->json->errorBadRequest(['rsvp_deadline must be a valid date (YYYY-MM-DD).']);
+                }
+
+                $user->rsvp_deadline = $deadline;
+            }
         }
 
         if (!empty($valid->get('old_password')) && !empty($valid->get('new_password'))) {

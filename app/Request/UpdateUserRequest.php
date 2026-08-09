@@ -25,6 +25,7 @@ class UpdateUserRequest extends Form
             'theme_text_color' => ['nullable', 'str', 'trim', 'min:7', 'max:7'],
             'theme_font' => ['nullable', 'str', 'trim', 'min:1', 'max:30'],
             'is_custom_theme' => ['nullable', 'bool'],
+            'rsvp_deadline' => ['nullable', 'str', 'trim', 'min:10', 'max:10'],
         ];
     }
 }

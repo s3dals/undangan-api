@@ -26,6 +26,23 @@ class GuestController extends Controller
     }
 
     /**
+     * The deadline is a plain date meaning "the whole of this day", so it is
+     * compared in the invitation owner's timezone rather than the server's.
+     *
+     * @return bool
+     */
+    private function isRsvpOpen(): bool
+    {
+        $deadline = Auth::user()->rsvp_deadline;
+
+        if (empty($deadline)) {
+            return true;
+        }
+
+        return Time::factory()->tz(Auth::user()->getTimezone() ?? 'UTC')->format('Y-m-d') <= $deadline;
+    }
+
+    /**
      * Result rows are hydrated as stdClass when iterating a collection, but as
      * a Model from first()/create() - accept both.
      *
@@ -151,6 +168,8 @@ class GuestController extends Controller
             'max_guests' => intval($guest->max_guests),
             'status' => $guest->status,
             'guest_count' => intval($guest->guest_count),
+            'rsvp_deadline' => Auth::user()->rsvp_deadline,
+            'can_respond' => $this->isRsvpOpen(),
         ]);
     }
 
@@ -168,6 +187,13 @@ class GuestController extends Controller
         $guest = Guest::where('token', $token)->where('user_id', Auth::id())->first();
         if (!$guest->exist()) {
             return $this->json->errorNotFound();
+        }
+
+        // Applies to changing an existing answer as much as to a first reply.
+        if (!$this->isRsvpOpen()) {
+            return $this->json->errorBadRequest([
+                sprintf('The deadline to respond was %s.', Auth::user()->rsvp_deadline),
+            ]);
         }
 
         $attending = boolval($valid->get('attending'));
@@ -191,6 +217,8 @@ class GuestController extends Controller
             'max_guests' => intval($guest->max_guests),
             'status' => $guest->status,
             'guest_count' => intval($guest->guest_count),
+            'rsvp_deadline' => Auth::user()->rsvp_deadline,
+            'can_respond' => $this->isRsvpOpen(),
         ]);
     }
 }
