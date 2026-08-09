@@ -7,6 +7,9 @@ use App\Response\JsonResponse;
 use Core\Auth\Auth;
 use Core\Routing\Controller;
 use Core\Http\Request;
+use Core\Database\DataBase;
+use Core\Facades\App;
+use Core\Support\Time;
 
 class ContentController extends Controller
 {
@@ -36,6 +39,45 @@ class ContentController extends Controller
         }
 
         return $result;
+    }
+
+
+    /**
+     * New keys are written in a single statement; inserting them one at a time
+     * is what made a first save slow enough to time out.
+     *
+     * @param array<string, string> $items
+     * @return void
+     */
+    private function insertMany(array $items): void
+    {
+        $now = Time::factory()->format('Y-m-d H:i:s');
+
+        $rows = [];
+        $bind = [];
+        $i = 0;
+
+        foreach ($items as $key => $value) {
+            $rows[] = sprintf('(:u%1$d, :k%1$d, :v%1$d, :c%1$d, :c%1$d)', $i);
+            $bind[':u' . $i] = Auth::id();
+            $bind[':k' . $i] = $key;
+            $bind[':v' . $i] = $value;
+            $bind[':c' . $i] = $now;
+            $i++;
+        }
+
+        /** @var DataBase $db */
+        $db = App::get()->singleton(DataBase::class);
+        $db->query(sprintf(
+            'INSERT INTO contents (user_id, content_key, content_value, created_at, updated_at) VALUES %s',
+            join(', ', $rows)
+        ));
+
+        foreach ($bind as $param => $value) {
+            $db->bind($param, $value);
+        }
+
+        $db->execute();
     }
 
     public function index(): JsonResponse
@@ -71,20 +113,47 @@ class ContentController extends Controller
             }
         }
 
-        foreach ($items as $key => $value) {
-            $existing = Content::where('user_id', Auth::id())->where('content_key', $key)->first();
+        // One read, then only the writes that actually change something. Doing a
+        // select plus a write per key meant ~90 sequential round trips for a full
+        // form, which at Supabase latency overran Vercel's 10s function limit.
+        $existing = [];
+        foreach (Content::where('user_id', Auth::id())->get() as $row) {
+            $existing[$row->content_key] = $row;
+        }
 
-            if ($existing->exist()) {
-                $existing->content_value = $value;
-                $existing->save();
+        $insert = [];
+        $remove = [];
+
+        foreach ($items as $key => $value) {
+            $value = is_string($value) ? trim($value) : '';
+            $current = $existing[$key] ?? null;
+
+            // Empty means "fall back to whatever the template says", so the row is
+            // dropped rather than stored as an empty string.
+            if ($value === '') {
+                if ($current) {
+                    $remove[] = intval($current->id);
+                }
+
                 continue;
             }
 
-            Content::create([
-                'user_id' => Auth::id(),
-                'content_key' => $key,
-                'content_value' => $value,
-            ]);
+            if (!$current) {
+                $insert[$key] = $value;
+                continue;
+            }
+
+            if (strval($current->content_value) !== $value) {
+                Content::where('id', intval($current->id))->update(['content_value' => $value]);
+            }
+        }
+
+        if (count($remove) > 0) {
+            Content::whereIn('id', $remove)->delete();
+        }
+
+        if (count($insert) > 0) {
+            $this->insertMany($insert);
         }
 
         return $this->json->successOK($this->map());
