@@ -196,6 +196,24 @@ class ContentController extends Controller
             $this->insertMany($insert);
         }
 
-        return $this->json->successOK($this->map());
+        // Built from what was just written rather than re-reading the table: at
+        // roughly half a second per round trip to the database, every avoidable
+        // query is worth removing from this request.
+        $result = [];
+        foreach ($items as $key => $value) {
+            $value = is_string($value) ? trim($value) : '';
+
+            if ($value !== '') {
+                $result[$key] = $value;
+            }
+        }
+
+        foreach ($existing as $key => $row) {
+            if (!array_key_exists($key, $items) && strval($row->content_value) !== '') {
+                $result[$key] = $row->content_value;
+            }
+        }
+
+        return $this->json->successOK($result);
     }
 }
