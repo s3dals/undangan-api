@@ -54,6 +54,7 @@ class GuestController extends Controller
         return [
             'id' => intval($guest->id),
             'name' => $guest->name,
+            'greeting' => $guest->greeting,
             'token' => $guest->token,
             'max_guests' => intval($guest->max_guests),
             'status' => $guest->status,
@@ -78,6 +79,7 @@ class GuestController extends Controller
     {
         $valid = $this->validate($request, [
             'name' => ['required', 'str', 'trim', 'min:1', 'max:100'],
+            'greeting' => ['nullable', 'str', 'trim', 'max:100'],
             'max_guests' => ['nullable', 'int'],
         ]);
 
@@ -90,9 +92,14 @@ class GuestController extends Controller
             return $this->json->errorBadRequest([sprintf('max_guests must be between 1 and %d.', self::MAX_PARTY_SIZE)]);
         }
 
+        // An empty greeting is stored as null, so the invitation-wide welcome
+        // message is what shows rather than a blank line above the name.
+        $greeting = trim(strval($valid->get('greeting') ?? ''));
+
         $guest = Guest::create([
             'user_id' => Auth::id(),
             'name' => $valid->get('name'),
+            'greeting' => $greeting === '' ? null : $greeting,
             'token' => Hash::rand(8),
             'max_guests' => $max,
             'status' => self::STATUS_PENDING,
@@ -106,6 +113,7 @@ class GuestController extends Controller
     {
         $valid = $this->validate($request, [
             'name' => ['nullable', 'str', 'trim', 'min:1', 'max:100'],
+            'greeting' => ['nullable', 'str', 'trim', 'max:100'],
             'max_guests' => ['nullable', 'int'],
         ]);
 
@@ -120,6 +128,13 @@ class GuestController extends Controller
 
         if (!empty($valid->get('name'))) {
             $guest->name = $valid->get('name');
+        }
+
+        // Keyed on presence in the request, not on emptiness: sending an empty
+        // greeting is how the owner goes back to the invitation-wide wording.
+        if (array_key_exists('greeting', $request->all())) {
+            $greeting = trim(strval($valid->get('greeting') ?? ''));
+            $guest->greeting = $greeting === '' ? null : $greeting;
         }
 
         if ($valid->get('max_guests') !== null) {
@@ -165,6 +180,7 @@ class GuestController extends Controller
 
         return $this->json->successOK([
             'name' => $guest->name,
+            'greeting' => $guest->greeting,
             'max_guests' => intval($guest->max_guests),
             'status' => $guest->status,
             'guest_count' => intval($guest->guest_count),
@@ -214,6 +230,7 @@ class GuestController extends Controller
 
         return $this->json->successOK([
             'name' => $guest->name,
+            'greeting' => $guest->greeting,
             'max_guests' => intval($guest->max_guests),
             'status' => $guest->status,
             'guest_count' => intval($guest->guest_count),
