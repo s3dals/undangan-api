@@ -26,12 +26,27 @@ CREATE TABLE IF NOT EXISTS users (
     theme_text_color VARCHAR(7) DEFAULT '#212529',
     theme_font VARCHAR(30) DEFAULT 'default',
     is_custom_theme BOOLEAN DEFAULT FALSE,
+    photo_home_url TEXT,
+    photo_bride_url TEXT,
+    photo_groom_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =====================================
--- Comments table (all columns from migrations) 
+-- Galleries table (user-uploaded gallery photos)
+-- =====================================
+CREATE TABLE IF NOT EXISTS galleries (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    storage_path TEXT NOT NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- =====================================
+-- Comments table (all columns from migrations)
 -- =====================================
 CREATE TABLE IF NOT EXISTS comments (
     id SERIAL PRIMARY KEY,

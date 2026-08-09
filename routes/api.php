@@ -3,6 +3,7 @@
 use App\Controllers\Api\AuthController;
 use App\Controllers\Api\CommentController;
 use App\Controllers\Api\DashboardController;
+use App\Controllers\Api\PhotoController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\DashboardMiddleware;
 use App\Middleware\RateLimitMiddleware;
@@ -34,6 +35,19 @@ Route::middleware([RateLimitMiddleware::class, AuthMiddleware::class])->group(fu
         Route::get('/user', [DashboardController::class, 'user']);
         Route::patch('/user', [DashboardController::class, 'update']);
         Route::options('/user');
+
+        Route::post('/photo', [PhotoController::class, 'uploadSlot']);
+        Route::options('/photo');
+
+        Route::prefix('/photo/gallery')->group(function () {
+            Route::post('/', [PhotoController::class, 'uploadGallery']);
+            Route::options('/');
+
+            Route::prefix('/{id}')->group(function () {
+                Route::delete('/', [PhotoController::class, 'deleteGallery']);
+                Route::options('/');
+            });
+        });
     });
 
     // Comment
@@ -65,6 +79,9 @@ Route::middleware([RateLimitMiddleware::class, AuthMiddleware::class])->group(fu
 
         Route::get('/config', [DashboardController::class, 'configV2']);
         Route::options('/config');
+
+        Route::get('/gallery', [PhotoController::class, 'listGallery']);
+        Route::options('/gallery');
 
         Route::prefix('/comment')->group(function () {
             Route::get('/', [CommentController::class, 'getV2']);

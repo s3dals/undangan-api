@@ -56,7 +56,7 @@ class DashboardController extends Controller
 
     public function configV2(): JsonResponse
     {
-        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment', 'theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color', 'theme_font', 'is_custom_theme']));
+        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment', 'theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color', 'theme_font', 'is_custom_theme', 'photo_home_url', 'photo_bride_url', 'photo_groom_url']));
     }
 
     public function update(UpdateUserRequest $request): JsonResponse
