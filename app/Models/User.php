@@ -44,6 +44,9 @@ final class User extends Model
         'theme_background_color',
         'theme_text_color',
         'theme_font',
+        'theme_font_arabic',
+        'theme_direction',
+        'theme_divider_color',
         'is_custom_theme',
         'rsvp_deadline',
     ];

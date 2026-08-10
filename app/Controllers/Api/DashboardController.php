@@ -19,6 +19,28 @@ class DashboardController extends Controller
 {
     private const THEME_FONTS = ['default', 'elegant', 'modern', 'classic', 'script'];
 
+    // None of the Latin faces carry Arabic glyphs, so the Arabic script gets its
+    // own list rather than sharing one picker that cannot serve both.
+    private const THEME_FONTS_ARABIC = ['default', 'naskh', 'amiri', 'cairo', 'tajawal', 'kufi'];
+
+    private const THEME_DIRECTIONS = ['auto', 'ltr', 'rtl'];
+
+    private const BOOLEAN_FIELDS = [
+        'filter' => 'is_filter',
+        'confetti_animation' => 'is_confetti_animation',
+        'can_edit' => 'can_edit',
+        'can_delete' => 'can_delete',
+        'can_reply' => 'can_reply',
+        'show_home' => 'show_home',
+        'show_bride' => 'show_bride',
+        'show_wedding_date' => 'show_wedding_date',
+        'show_gallery' => 'show_gallery',
+        'show_comment' => 'show_comment',
+        'show_story' => 'show_story',
+        'show_gift' => 'show_gift',
+        'show_dresscode' => 'show_dresscode',
+    ];
+
     private $json;
 
     public function __construct(JsonResponse $json)
@@ -56,7 +78,7 @@ class DashboardController extends Controller
 
     public function configV2(): JsonResponse
     {
-        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment', 'show_story', 'show_gift', 'show_dresscode', 'theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color', 'theme_font', 'is_custom_theme', 'rsvp_deadline']));
+        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment', 'show_story', 'show_gift', 'show_dresscode', 'theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color', 'theme_font', 'theme_font_arabic', 'theme_direction', 'theme_divider_color', 'is_custom_theme', 'rsvp_deadline']));
     }
 
     public function update(UpdateUserRequest $request): JsonResponse
@@ -85,56 +107,13 @@ class DashboardController extends Controller
             $user->tenor_key = $valid->tenor_key;
         }
 
-        if ($valid->get('filter') !== null) {
-            $user->is_filter = boolval($valid->filter);
-        }
-
-        if ($valid->get('confetti_animation') !== null) {
-            $user->is_confetti_animation = boolval($valid->confetti_animation);
-        }
-
-        if ($valid->get('can_edit') !== null) {
-            $user->can_edit = boolval($valid->can_edit);
-        }
-
-        if ($valid->get('can_delete') !== null) {
-            $user->can_delete = boolval($valid->can_delete);
-        }
-
-        if ($valid->get('can_reply') !== null) {
-            $user->can_reply = boolval($valid->can_reply);
-        }
-
-        if ($valid->get('show_home') !== null) {
-            $user->show_home = boolval($valid->show_home);
-        }
-
-        if ($valid->get('show_bride') !== null) {
-            $user->show_bride = boolval($valid->show_bride);
-        }
-
-        if ($valid->get('show_wedding_date') !== null) {
-            $user->show_wedding_date = boolval($valid->show_wedding_date);
-        }
-
-        if ($valid->get('show_gallery') !== null) {
-            $user->show_gallery = boolval($valid->show_gallery);
-        }
-
-        if ($valid->get('show_comment') !== null) {
-            $user->show_comment = boolval($valid->show_comment);
-        }
-
-        if ($valid->get('show_story') !== null) {
-            $user->show_story = boolval($valid->show_story);
-        }
-
-        if ($valid->get('show_gift') !== null) {
-            $user->show_gift = boolval($valid->show_gift);
-        }
-
-        if ($valid->get('show_dresscode') !== null) {
-            $user->show_dresscode = boolval($valid->show_dresscode);
+        // Request key => column. Two of them are named differently on the model,
+        // the rest match; a table beats thirteen near-identical if-blocks and
+        // means a new switch costs one line here rather than five.
+        foreach (self::BOOLEAN_FIELDS as $key => $column) {
+            if ($valid->get($key) !== null) {
+                $user->{$column} = boolval($valid->get($key));
+            }
         }
 
         foreach (['theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color'] as $field) {
@@ -147,12 +126,42 @@ class DashboardController extends Controller
             }
         }
 
+        // Cleared rather than merely absent: an empty divider colour means
+        // "follow the text colour", which is how it has always been painted.
+        if (array_key_exists('theme_divider_color', $request->all())) {
+            $divider = $valid->get('theme_divider_color');
+
+            if (empty($divider)) {
+                $user->theme_divider_color = null;
+            } elseif (!preg_match('/^#[0-9a-fA-F]{6}$/', $divider)) {
+                return $this->json->errorBadRequest(['theme_divider_color must be a valid hex color.']);
+            } else {
+                $user->theme_divider_color = strtolower($divider);
+            }
+        }
+
         if (!empty($valid->get('theme_font'))) {
             if (!in_array($valid->get('theme_font'), self::THEME_FONTS)) {
                 return $this->json->errorBadRequest(['Invalid theme font.']);
             }
 
             $user->theme_font = $valid->get('theme_font');
+        }
+
+        if (!empty($valid->get('theme_font_arabic'))) {
+            if (!in_array($valid->get('theme_font_arabic'), self::THEME_FONTS_ARABIC)) {
+                return $this->json->errorBadRequest(['Invalid Arabic theme font.']);
+            }
+
+            $user->theme_font_arabic = $valid->get('theme_font_arabic');
+        }
+
+        if (!empty($valid->get('theme_direction'))) {
+            if (!in_array($valid->get('theme_direction'), self::THEME_DIRECTIONS)) {
+                return $this->json->errorBadRequest(['Invalid text direction.']);
+            }
+
+            $user->theme_direction = $valid->get('theme_direction');
         }
 
         if ($valid->get('is_custom_theme') !== null) {
