@@ -15,7 +15,8 @@ class AuthRequest extends Form
     {
         return [
             'email' => ['required', 'str', 'trim', 'min:5', 'max:55', 'email'],
-            'password' => ['required', 'str', 'trim', 'min:8', 'max:20']
+            'password' => ['required', 'str', 'trim', 'min:8', 'max:20'],
+            'remember' => ['nullable', 'bool']
         ];
     }
 }

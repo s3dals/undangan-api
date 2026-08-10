@@ -37,6 +37,10 @@ Route::middleware([RateLimitMiddleware::class, AuthMiddleware::class])->group(fu
         Route::patch('/user', [DashboardController::class, 'update']);
         Route::options('/user');
 
+        // Renews a session that is already signed in.
+        Route::post('/session/refresh', [AuthController::class, 'refresh']);
+        Route::options('/session/refresh');
+
         // Invitation texts
         Route::get('/content', [ContentController::class, 'index']);
         Route::put('/content', [ContentController::class, 'update']);
