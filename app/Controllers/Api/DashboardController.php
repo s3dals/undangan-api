@@ -73,12 +73,15 @@ class DashboardController extends Controller
 
     public function user(): JsonResponse
     {
-        return $this->json->successOK(Auth::user()->except(['id', 'password', 'is_admin', 'is_active', 'created_at', 'updated_at']));
+        // photo_couple is the base64 image itself, a few hundred kB. The
+        // dashboard only needs to know whether one exists and which one,
+        // which is what the version is for.
+        return $this->json->successOK(Auth::user()->except(['id', 'password', 'is_admin', 'is_active', 'created_at', 'updated_at', 'photo_couple', 'photo_couple_type']));
     }
 
     public function configV2(): JsonResponse
     {
-        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment', 'show_story', 'show_gift', 'show_dresscode', 'theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color', 'theme_font', 'theme_font_arabic', 'theme_direction', 'theme_divider_color', 'is_custom_theme', 'rsvp_deadline']));
+        return $this->json->successOK(Auth::user()->only(['tz', 'can_edit', 'can_delete', 'can_reply', 'tenor_key', 'is_confetti_animation', 'show_home', 'show_bride', 'show_wedding_date', 'show_gallery', 'show_comment', 'show_story', 'show_gift', 'show_dresscode', 'theme_primary_color', 'theme_secondary_color', 'theme_background_color', 'theme_text_color', 'theme_font', 'theme_font_arabic', 'theme_direction', 'theme_divider_color', 'is_custom_theme', 'rsvp_deadline', 'photo_couple_version']));
     }
 
     public function update(UpdateUserRequest $request): JsonResponse

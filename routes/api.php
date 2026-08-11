@@ -5,6 +5,7 @@ use App\Controllers\Api\CommentController;
 use App\Controllers\Api\ContentController;
 use App\Controllers\Api\DashboardController;
 use App\Controllers\Api\GuestController;
+use App\Controllers\Api\PhotoController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\DashboardMiddleware;
 use App\Middleware\RateLimitMiddleware;
@@ -18,6 +19,17 @@ use Core\Routing\Route;
 Route::middleware(RateLimitMiddleware::class)->prefix('/session')->group(function () {
     Route::post('/', [AuthController::class, 'login']);
     Route::options('/'); // Preflight request [/api/session]
+});
+
+/**
+ * The couple photo, outside AuthMiddleware on purpose: an <img src> cannot send
+ * an x-access-key header, so this route takes the key in the query string. That
+ * key is already printed in the invitation's HTML and grants nothing more here -
+ * the response is one image belonging to that key's owner.
+ */
+Route::middleware(RateLimitMiddleware::class)->prefix('/v2/photo')->group(function () {
+    Route::get('/', [PhotoController::class, 'show']);
+    Route::options('/'); // Preflight request [/api/v2/photo]
 });
 
 Route::middleware([RateLimitMiddleware::class, AuthMiddleware::class])->group(function () {
@@ -40,6 +52,11 @@ Route::middleware([RateLimitMiddleware::class, AuthMiddleware::class])->group(fu
         // Renews a session that is already signed in.
         Route::post('/session/refresh', [AuthController::class, 'refresh']);
         Route::options('/session/refresh');
+
+        // Couple photo, admin side. Reading it is the public route above.
+        Route::post('/photo', [PhotoController::class, 'upload']);
+        Route::delete('/photo', [PhotoController::class, 'destroy']);
+        Route::options('/photo');
 
         // Invitation texts
         Route::get('/content', [ContentController::class, 'index']);

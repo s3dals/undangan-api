@@ -49,6 +49,9 @@ final class User extends Model
         'theme_divider_color',
         'is_custom_theme',
         'rsvp_deadline',
+        'photo_couple',
+        'photo_couple_type',
+        'photo_couple_version',
     ];
 
     protected $casts = [

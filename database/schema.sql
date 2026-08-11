@@ -33,6 +33,9 @@ CREATE TABLE IF NOT EXISTS users (
     theme_divider_color VARCHAR(7),
     is_custom_theme BOOLEAN DEFAULT FALSE,
     rsvp_deadline VARCHAR(10),
+    photo_couple TEXT,
+    photo_couple_type VARCHAR(30),
+    photo_couple_version VARCHAR(32),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
