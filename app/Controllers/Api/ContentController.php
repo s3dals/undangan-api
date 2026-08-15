@@ -13,7 +13,7 @@ use Core\Support\Time;
 
 class ContentController extends Controller
 {
-    private const MAX_KEYS = 100;
+    private const MAX_KEYS = 200;
     private const MAX_KEY_LENGTH = 50;
     private const MAX_VALUE_LENGTH = 5000;
 
